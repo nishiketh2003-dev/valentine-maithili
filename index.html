@@ -211,7 +211,7 @@
     <div class="top">
       <div class="photo" aria-hidden="true">
         <!-- If your photos load, this img shows. Otherwise emoji fallback shows. -->
-        <img id="photoEl" src="photo1.jpeg" alt="" onerror="this.remove()" />
+        <img id="photoEl" src="photo1.jpeg" alt="" onload="document.getElementById('emojiFallback').style.display='none'" onerror="this.style.display='none'" />
         <span class="fallback" id="emojiFallback">🐻‍❄️</span>
       </div>
 
