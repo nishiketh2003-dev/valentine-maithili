@@ -241,187 +241,212 @@
   </div>
 
   <script>
-    // ====== CUSTOMIZE HERE ======
-    const CONFIG = {
-      const NO_PHRASES = [
-  "No 🙃",
-  "Are you sure? 😳",
-  "Think again 😤",
-  "Pleaseeee 🥺",
-  "Last chance 😈",
-  "Okay fine… 😔"
-];
+  // ====== CUSTOMIZE HERE ======
+  const CONFIG = {
+    targetName: "Maithili",
+    lines: [
+      "Okay listen… no pressure 😇",
+      "But you + me = cutest Valentine ever 💘",
+      "Will you be my Valentine?"
+    ],
+    successMessage: "YAYYY 💞\nSee you on Feb 14? 🥰❤️",
 
-      targetName: "Maithili",
-      lines: [
-        "Okay listen… no pressure 😇",
-        "But you + me = cutest Valentine ever 💘",
-        "Will you be my Valentine?"
-      ],
-      successMessage: "YAYYY 💞\nSee you on Feb 14? 🥰❤️",
-      // Photo slideshow (optional): put your photos in assets/photos/
-      photos: [
-        "photo1.jpeg",
-        "photo2.jpeg",
-        "photo3.jpeg"
-      ],
-      photoChangeMs: 2500,
+    // Your photos are in repo ROOT and are .jpeg
+    photos: ["photo1.jpeg", "photo2.jpeg", "photo3.jpeg"],
+    photoChangeMs: 2500,
 
-      // No-button behavior
-      maxDodges: 18,        // after this, it stops running away
-      shrinkNoEachTime: 0.06, // No shrinks by 6% each dodge
-      growYesEachTime: 0.07,  // Yes grows by 7% each dodge
+    // No-button behavior
+    maxDodges: 18,
+    shrinkNoEachTime: 0.06,
+    growYesEachTime: 0.07,
+  };
+
+  const NO_PHRASES = [
+    "No 🙃",
+    "Are you sure? 😳",
+    "Think again 😤",
+    "Pleaseeee 🥺",
+    "Last chance 😈",
+    "Okay fine… 😔"
+  ];
+
+  // ====== ELEMENTS ======
+  const title = document.getElementById("title");
+  const typed = document.getElementById("typed");
+  const yesBtn = document.getElementById("yesBtn");
+  const noBtn = document.getElementById("noBtn");
+  const modal = document.getElementById("modal");
+  const modalCard = document.getElementById("modalCard");
+  const closeBtn = document.getElementById("closeBtn");
+  const successText = document.getElementById("successText");
+  const emojiFallback = document.getElementById("emojiFallback");
+  const photoEl = document.getElementById("photoEl");
+
+  // Guard: if any of these are null, the script would crash
+  if (!yesBtn || !noBtn || !modal || !closeBtn) {
+    console.error("Missing required elements. Check IDs in HTML.");
+  }
+
+  // Title + success message
+  title.textContent = `${CONFIG.targetName}, will you be my Valentine? 💘`;
+  successText.textContent = CONFIG.successMessage;
+
+  // ====== TYPING ======
+  async function typeLine(line, speed = 28) {
+    for (let i = 0; i < line.length; i++) {
+      typed.textContent += line[i];
+      await new Promise(r => setTimeout(r, speed));
+    }
+  }
+  async function backspace(count, speed = 18) {
+    for (let i = 0; i < count; i++) {
+      typed.textContent = typed.textContent.slice(0, -1);
+      await new Promise(r => setTimeout(r, speed));
+    }
+  }
+  async function runTyping() {
+    for (let i = 0; i < CONFIG.lines.length; i++) {
+      typed.textContent = "";
+      await typeLine(CONFIG.lines[i]);
+      if (i !== CONFIG.lines.length - 1) {
+        await new Promise(r => setTimeout(r, 700));
+        await backspace(CONFIG.lines[i].length);
+        await new Promise(r => setTimeout(r, 220));
+      }
+    }
+  }
+
+  // ====== PHOTOS ======
+  function startSlideshow() {
+    if (!photoEl || !CONFIG.photos?.length) return;
+
+    let idx = 0;
+
+    // Set initial image
+    photoEl.src = CONFIG.photos[0];
+
+    // When image loads, hide emoji
+    photoEl.onload = () => {
+      if (emojiFallback) emojiFallback.style.display = "none";
     };
 
-    const title = document.getElementById("title");
-    const typed = document.getElementById("typed");
-    const yesBtn = document.getElementById("yesBtn");
-    const noBtn = document.getElementById("noBtn");
-    const btnRow = document.getElementById("btnRow");
-    const modal = document.getElementById("modal");
-    const modalCard = document.getElementById("modalCard");
-    const closeBtn = document.getElementById("closeBtn");
-    const successText = document.getElementById("successText");
-    const emojiFallback = document.getElementById("emojiFallback");
-    const photoEl = document.getElementById("photoEl");
+    // If image fails, show emoji (but don't crash)
+    photoEl.onerror = () => {
+      if (emojiFallback) emojiFallback.style.display = "inline-block";
+    };
 
-    title.textContent = `${CONFIG.targetName}, will you be my Valentine? 💘`;
-    successText.textContent = CONFIG.successMessage;
+    setInterval(() => {
+      idx = (idx + 1) % CONFIG.photos.length;
+      photoEl.src = CONFIG.photos[idx];
+    }, CONFIG.photoChangeMs);
+  }
 
-    // -------- Typing animation (multi-line loop, then stop on final line) --------
-    async function typeLine(line, speed=28) {
-      for (let i = 0; i < line.length; i++) {
-        typed.textContent += line[i];
-        await new Promise(r => setTimeout(r, speed));
-      }
+  // ====== NO BUTTON TELEPORT (full screen) ======
+  function placeNoButton() {
+    const padding = 12;
+    const bw = noBtn.offsetWidth;
+    const bh = noBtn.offsetHeight;
+
+    const maxX = window.innerWidth - bw - padding;
+    const maxY = window.innerHeight - bh - padding;
+
+    const x = padding + Math.random() * Math.max(0, maxX - padding);
+    const y = padding + Math.random() * Math.max(0, maxY - padding);
+
+    noBtn.style.position = "fixed";
+    noBtn.style.left = x + "px";
+    noBtn.style.top = y + "px";
+    noBtn.style.zIndex = "20"; // ensure it's clickable but not blocking modal
+  }
+
+  function confettiBurst(count = 110) {
+    const colors = ["#ff4d8d", "#ffb703", "#4cc9f0", "#22c55e", "#a855f7", "#fb7185"];
+    for (let i = 0; i < count; i++) {
+      const c = document.createElement("div");
+      c.className = "confetti";
+      c.style.left = Math.random() * 100 + "%";
+      c.style.background = colors[Math.floor(Math.random() * colors.length)];
+      c.style.animationDelay = (Math.random() * 0.35) + "s";
+      c.style.borderRadius = (Math.random() > 0.5) ? "3px" : "999px";
+      c.style.width = (6 + Math.random() * 10) + "px";
+      c.style.height = (10 + Math.random() * 16) + "px";
+      modalCard.appendChild(c);
+      setTimeout(() => c.remove(), 2200);
     }
-    async function backspace(count, speed=18) {
-      for (let i = 0; i < count; i++) {
-        typed.textContent = typed.textContent.slice(0, -1);
-        await new Promise(r => setTimeout(r, speed));
-      }
-    }
-    async function runTyping() {
-      for (let i = 0; i < CONFIG.lines.length; i++) {
-        typed.textContent = "";
-        await typeLine(CONFIG.lines[i]);
-        // keep last line on screen
-        if (i !== CONFIG.lines.length - 1) {
-          await new Promise(r => setTimeout(r, 700));
-          await backspace(CONFIG.lines[i].length);
-          await new Promise(r => setTimeout(r, 220));
-        }
-      }
-    }
+  }
 
-    // -------- Photo slideshow (optional) --------
-    function startSlideshow() {
-      if (!photoEl || !CONFIG.photos?.length) return;
-      let idx = 0;
+  let dodges = 0;
+  let yesScale = 1;
+  let noScale = 1;
 
-      // If first photo fails, fallback emoji stays (img removed by onerror).
-      const tick = () => {
-        if (!document.body.contains(photoEl)) return; // img removed due to error
-        idx = (idx + 1) % CONFIG.photos.length;
-        photoEl.src = CONFIG.photos[idx];
-      };
+  function dodge() {
+    dodges++;
 
-      setInterval(tick, CONFIG.photoChangeMs);
-    }
+    // change text each time
+    noBtn.textContent = NO_PHRASES[Math.min(dodges, NO_PHRASES.length - 1)];
 
-    // -------- No button dodge logic --------
-    let dodges = 0;
-    let yesScale = 1;
-    let noScale = 1;
+    // emoji reactions
+    const emojis = ["🥺", "😳", "😭", "🫣", "🤭", "😈", "💘", "🧸", "🐻‍❄️"];
+    if (emojiFallback) emojiFallback.textContent = emojis[Math.floor(Math.random() * emojis.length)];
 
-    function placeNoButton() {
-  const padding = 12;
+    // grow yes + shrink no
+    yesScale = 1 + Math.min(dodges * CONFIG.growYesEachTime, 1.2);
+    yesBtn.style.transform = `scale(${yesScale})`;
 
-  const bw = noBtn.offsetWidth;
-  const bh = noBtn.offsetHeight;
+    noScale = Math.max(1 - dodges * CONFIG.shrinkNoEachTime, 0.35);
+    noBtn.style.transform = `scale(${noScale})`;
+    noBtn.style.opacity = String(Math.max(1 - dodges * 0.03, 0.6));
 
-  const maxX = window.innerWidth - bw - padding;
-  const maxY = window.innerHeight - bh - padding;
-
-  const x = padding + Math.random() * Math.max(0, maxX - padding);
-  const y = padding + Math.random() * Math.max(0, maxY - padding);
-
-  noBtn.style.position = "fixed";
-  noBtn.style.left = x + "px";
-  noBtn.style.top = y + "px";
-}
-
-
-    function confettiBurst(count = 110) {
-      const colors = ["#ff4d8d", "#ffb703", "#4cc9f0", "#22c55e", "#a855f7", "#fb7185"];
-      for (let i = 0; i < count; i++) {
-        const c = document.createElement("div");
-        c.className = "confetti";
-        c.style.left = Math.random() * 100 + "%";
-        c.style.background = colors[Math.floor(Math.random() * colors.length)];
-        c.style.animationDelay = (Math.random() * 0.35) + "s";
-        c.style.borderRadius = (Math.random() > 0.5) ? "3px" : "999px";
-        c.style.width = (6 + Math.random() * 10) + "px";
-        c.style.height = (10 + Math.random() * 16) + "px";
-        modalCard.appendChild(c);
-        setTimeout(() => c.remove(), 2200);
-      }
+    // stop after max dodges
+    if (dodges >= CONFIG.maxDodges) {
+      noBtn.textContent = "Okay fine 😔";
+      // stop dodging
+      noBtn.replaceWith(noBtn.cloneNode(true)); // removes old listeners safely
+      const newNoBtn = document.getElementById("noBtn");
+      newNoBtn.textContent = "Okay fine 😔";
+      newNoBtn.style.position = "fixed";
+      newNoBtn.style.left = noBtn.style.left;
+      newNoBtn.style.top = noBtn.style.top;
+      newNoBtn.style.transform = noBtn.style.transform;
+      newNoBtn.style.opacity = noBtn.style.opacity;
+      return;
     }
 
-    function dodge() {
-      dodges++ noBtn.textContent = NO_PHRASES[Math.min(dodges, NO_PHRASES.length - 1)];
-;
+    placeNoButton();
+  }
 
-      // emoji reactions for extra cute
-      const emojis = ["🥺","😳","😭","🫣","🤭","😈","💘","🧸","🐻‍❄️"];
-      emojiFallback.textContent = emojis[Math.floor(Math.random() * emojis.length)];
-
-      // Grow Yes + Shrink No
-      yesScale = 1 + Math.min(dodges * CONFIG.growYesEachTime, 1.2);
-      yesBtn.style.transform = `scale(${yesScale})`;
-
-      noScale = Math.max(1 - dodges * CONFIG.shrinkNoEachTime, 0.35);
-      noBtn.style.transform = `scale(${noScale})`;
-      noBtn.style.opacity = String(Math.max(1 - dodges * 0.03, 0.6));
-
-      // After too many dodges, stop running and become "Okay fine"
-      if (dodges >= CONFIG.maxDodges) {
-        noBtn.textContent = "Okay fine 😔";
-        // stop dodging
-        noBtn.onmouseenter = null;
-        noBtn.onclick = null;
-        noBtn.ontouchstart = null;
-        return;
-      }
-
-      placeNoButton();
-    }
-
-    // Events
+  // ====== EVENTS ======
+  function wireEvents() {
     yesBtn.addEventListener("click", () => {
       modal.classList.add("show");
       confettiBurst();
     });
 
-    // dodge on hover, click, touch
-    const attachDodge = (evt) => {
-      noBtn.addEventListener(evt, (e) => {
-        if (evt === "touchstart") e.preventDefault();
-        dodge();
-      }, { passive: false });
-    };
-    ["mouseenter","click","touchstart"].forEach(attachDodge);
-
     closeBtn.addEventListener("click", () => {
       modal.classList.remove("show");
     });
 
-    window.addEventListener("load", () => {
-      placeNoButton();
-      runTyping();
-      startSlideshow();
+    ["mouseenter", "click", "touchstart"].forEach(evt => {
+      noBtn.addEventListener(evt, (e) => {
+        if (evt === "touchstart") e.preventDefault();
+        dodge();
+      }, { passive: false });
     });
-    window.addEventListener("resize", placeNoButton);
-  </script>
+
+    window.addEventListener("resize", () => {
+      // keep it on screen after resize
+      placeNoButton();
+    });
+  }
+
+  // ====== INIT ======
+  window.addEventListener("load", () => {
+    placeNoButton();
+    runTyping();
+    startSlideshow();
+    wireEvents();
+  });
+</script>
+
 </body>
 </html>
