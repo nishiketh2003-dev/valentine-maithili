@@ -420,20 +420,27 @@
 
     noBtn.style.opacity = String(Math.max(1 - dodges * 0.03, 0.6));
 
-    // stop after max dodges
-    if (dodges >= CONFIG.maxDodges) {
-      noBtn.textContent = "Okay fine 😔";
-      // stop dodging
-      noBtn.replaceWith(noBtn.cloneNode(true)); // removes old listeners safely
-      const newNoBtn = document.getElementById("noBtn");
-      newNoBtn.textContent = "Okay fine 😔";
-      newNoBtn.style.position = "fixed";
-      newNoBtn.style.left = noBtn.style.left;
-      newNoBtn.style.top = noBtn.style.top;
-      newNoBtn.style.transform = noBtn.style.transform;
-      newNoBtn.style.opacity = noBtn.style.opacity;
-      return;
-    }
+    // stop after max dodges (make it clickable and stop running)
+if (dodges >= CONFIG.maxDodges) {
+  noBtn.textContent = "Okay fine 😔";
+  // Remove dodge triggers
+  noBtn.onmouseenter = null;
+  noBtn.onclick = null;
+  noBtn.ontouchstart = null;
+
+  // Also remove the addEventListener ones by replacing with a clean clone,
+  // BUT keep the ID and update our reference:
+  const clone = noBtn.cloneNode(true);
+  clone.id = "noBtn";
+  noBtn.parentNode.replaceChild(clone, noBtn);
+
+  // Re-bind `noBtn` reference to the new node so future code doesn't break
+  // (we won't dodge anymore, but we keep everything stable)
+  window.noBtn = clone;
+
+  return;
+}
+
 
     placeNoButton();
   }
