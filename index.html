@@ -408,7 +408,8 @@
     dodges++;
 
     // change text each time
-    noBtn.textContent = NO_PHRASES[Math.min(dodges, NO_PHRASES.length - 1)];
+    noBtn.textContent = NO_PHRASES[Math.min(dodges - 1, NO_PHRASES.length - 1)];
+
 
     // emoji reactions
     const emojis = ["🥺", "😳", "😭", "🫣", "🤭", "😈", "💘", "🧸", "🐻‍❄️"];
@@ -420,26 +421,13 @@
 
     noBtn.style.opacity = String(Math.max(1 - dodges * 0.03, 0.6));
 
-    // stop after max dodges (make it clickable and stop running)
-if (dodges >= CONFIG.maxDodges) {
-  noBtn.textContent = "Okay fine 😔";
-  // Remove dodge triggers
-  noBtn.onmouseenter = null;
-  noBtn.onclick = null;
-  noBtn.ontouchstart = null;
+    if (dodges >= CONFIG.maxDodges) {
+      noBtn.textContent = "Okay fine 😔";
+  // Stop moving it anymore:
+      CONFIG.maxDodges = Number.POSITIVE_INFINITY;
+    return;
+  }
 
-  // Also remove the addEventListener ones by replacing with a clean clone,
-  // BUT keep the ID and update our reference:
-  const clone = noBtn.cloneNode(true);
-  clone.id = "noBtn";
-  noBtn.parentNode.replaceChild(clone, noBtn);
-
-  // Re-bind `noBtn` reference to the new node so future code doesn't break
-  // (we won't dodge anymore, but we keep everything stable)
-  window.noBtn = clone;
-
-  return;
-}
 
 
     placeNoButton();
