@@ -345,21 +345,62 @@
 
   // ====== NO BUTTON TELEPORT (full screen) ======
   function placeNoButton() {
-    const padding = 12;
-    const bw = noBtn.offsetWidth;
-    const bh = noBtn.offsetHeight;
+  const padding = 12;
 
+  // Get Yes button position to avoid overlapping it
+  const yesRect = yesBtn.getBoundingClientRect();
+
+  const bw = noBtn.offsetWidth;
+  const bh = noBtn.offsetHeight;
+
+  // Try a few times to find a spot that doesn't overlap Yes
+  for (let tries = 0; tries < 30; tries++) {
     const maxX = window.innerWidth - bw - padding;
     const maxY = window.innerHeight - bh - padding;
 
     const x = padding + Math.random() * Math.max(0, maxX - padding);
     const y = padding + Math.random() * Math.max(0, maxY - padding);
 
-    noBtn.style.position = "fixed";
-    noBtn.style.left = x + "px";
-    noBtn.style.top = y + "px";
-    noBtn.style.zIndex = "20"; // ensure it's clickable but not blocking modal
+    // Candidate rectangle for No button
+    const noRect = {
+      left: x,
+      top: y,
+      right: x + bw,
+      bottom: y + bh
+    };
+
+    // Check overlap with Yes button (add some extra "personal space")
+    const buffer = 40;
+    const yesBuffered = {
+      left: yesRect.left - buffer,
+      top: yesRect.top - buffer,
+      right: yesRect.right + buffer,
+      bottom: yesRect.bottom + buffer
+    };
+
+    const overlapsYes =
+      noRect.left < yesBuffered.right &&
+      noRect.right > yesBuffered.left &&
+      noRect.top < yesBuffered.bottom &&
+      noRect.bottom > yesBuffered.top;
+
+    // If it doesn't overlap Yes, place it
+    if (!overlapsYes) {
+      noBtn.style.position = "fixed";
+      noBtn.style.left = x + "px";
+      noBtn.style.top = y + "px";
+      noBtn.style.zIndex = "20";
+      return;
+    }
   }
+
+  // Fallback: if we failed 30 times, just put it top-left-ish
+  noBtn.style.position = "fixed";
+  noBtn.style.left = padding + "px";
+  noBtn.style.top = padding + "px";
+  noBtn.style.zIndex = "20";
+}
+
 
   function confettiBurst(count = 110) {
     const colors = ["#ff4d8d", "#ffb703", "#4cc9f0", "#22c55e", "#a855f7", "#fb7185"];
