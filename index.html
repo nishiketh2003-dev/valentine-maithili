@@ -7,12 +7,12 @@
   <style>
     :root{
       --bg1:#ffd6e7;
-      --bg2:#c9f2ff;
+      --bg2:#e7d6ff;
+      --yes:#ff4d8d;
+      --no:#111827;
       --card:#ffffffcc;
       --text:#1f1235;
       --muted: rgba(31,18,53,.72);
-      --yes:#22c55e;
-      --no:#ef4444;
       --shadow: 0 22px 70px rgba(0,0,0,.18);
       --radius: 28px;
     }
@@ -243,6 +243,15 @@
   <script>
     // ====== CUSTOMIZE HERE ======
     const CONFIG = {
+      const NO_PHRASES = [
+  "No 🙃",
+  "Are you sure? 😳",
+  "Think again 😤",
+  "Pleaseeee 🥺",
+  "Last chance 😈",
+  "Okay fine… 😔"
+];
+
       targetName: "Maithili",
       lines: [
         "Okay listen… no pressure 😇",
@@ -326,22 +335,22 @@
     let noScale = 1;
 
     function placeNoButton() {
-      const rowRect = btnRow.getBoundingClientRect();
-      const padding = 8;
+  const padding = 12;
 
-      // ensure button has layout
-      const bw = noBtn.offsetWidth;
-      const bh = noBtn.offsetHeight;
+  const bw = noBtn.offsetWidth;
+  const bh = noBtn.offsetHeight;
 
-      const maxX = Math.max(padding, rowRect.width - bw - padding);
-      const maxY = Math.max(padding, rowRect.height - bh - padding);
+  const maxX = window.innerWidth - bw - padding;
+  const maxY = window.innerHeight - bh - padding;
 
-      const x = padding + Math.random() * (maxX - padding);
-      const y = padding + Math.random() * (maxY - padding);
+  const x = padding + Math.random() * Math.max(0, maxX - padding);
+  const y = padding + Math.random() * Math.max(0, maxY - padding);
 
-      noBtn.style.left = x + "px";
-      noBtn.style.top = y + "px";
-    }
+  noBtn.style.position = "fixed";
+  noBtn.style.left = x + "px";
+  noBtn.style.top = y + "px";
+}
+
 
     function confettiBurst(count = 110) {
       const colors = ["#ff4d8d", "#ffb703", "#4cc9f0", "#22c55e", "#a855f7", "#fb7185"];
@@ -360,7 +369,8 @@
     }
 
     function dodge() {
-      dodges++;
+      dodges++ noBtn.textContent = NO_PHRASES[Math.min(dodges, NO_PHRASES.length - 1)];
+;
 
       // emoji reactions for extra cute
       const emojis = ["🥺","😳","😭","🫣","🤭","😈","💘","🧸","🐻‍❄️"];
