@@ -440,28 +440,17 @@ function placeNoButton() {
   let noScale = 1;
 
   function dodge() {
-    dodges++;
+  noBtn.animate(
+    [
+      { transform: "translateX(0)" },
+      { transform: "translateX(-10px)" },
+      { transform: "translateX(10px)" },
+      { transform: "translateX(0)" }
+    ],
+    { duration: 300, iterations: 1 }
+  );
+}
 
-    // change text each time
-    noBtn.textContent = NO_PHRASES[Math.min(dodges - 1, NO_PHRASES.length - 1)];
-
-
-    // emoji reactions
-    const emojis = ["🥺", "😳", "😭", "🫣", "🤭", "😈", "💘", "🧸", "🐻‍❄️"];
-    if (emojiFallback) emojiFallback.textContent = emojis[Math.floor(Math.random() * emojis.length)];
-
-    // grow yes + shrink no
-    yesScale = 1 + Math.min(dodges * CONFIG.growYesEachTime, 1.2);
-    yesBtn.style.transform = `scale(${yesScale})`;
-
-    noBtn.style.opacity = String(Math.max(1 - dodges * 0.03, 0.6));
-
-    if (dodges >= CONFIG.maxDodges) {
-      noBtn.textContent = "Okay fine 😔";
-  // Stop moving it anymore:
-      CONFIG.maxDodges = Number.POSITIVE_INFINITY;
-    return;
-  }
 
 
 
