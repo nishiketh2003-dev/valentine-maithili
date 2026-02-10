@@ -344,45 +344,79 @@
   }
 
   // ====== NO BUTTON TELEPORT (full screen) ======
- function placeNoButton() {
-  const padding = 12;
+function placeNoButton() {
+  const padding = 14;
+  const card = document.getElementById("card");
+  const cardRect = card.getBoundingClientRect();
 
-  // Ensure No button is fixed before measuring
+  // Make sure No is fixed so it can go anywhere
   noBtn.style.position = "fixed";
   noBtn.style.zIndex = "20";
 
-  const yesRect = yesBtn.getBoundingClientRect();
+  // Measure No button’s real rendered size
+  const noRectNow = noBtn.getBoundingClientRect();
+  const bw = noRectNow.width || 140;
+  const bh = noRectNow.height || 50;
 
-  // Measure the CURRENT rendered size of No (including any transforms)
-  const noRendered = noBtn.getBoundingClientRect();
-  const bw = noRendered.width || 140;
-  const bh = noRendered.height || 50;
+  // Define 4 safe regions OUTSIDE the card (top, bottom, left, right)
+  const regions = [];
 
-  for (let tries = 0; tries < 60; tries++) {
-    const maxX = window.innerWidth - bw - padding;
-    const maxY = window.innerHeight - bh - padding;
-
-    const x = padding + Math.random() * Math.max(0, maxX - padding);
-    const y = padding + Math.random() * Math.max(0, maxY - padding);
-
-    const buffer = 70; // bigger "personal space" so it never feels inside
-    const overlapsYes =
-      x < (yesRect.right + buffer) &&
-      (x + bw) > (yesRect.left - buffer) &&
-      y < (yesRect.bottom + buffer) &&
-      (y + bh) > (yesRect.top - buffer);
-
-    if (!overlapsYes) {
-      noBtn.style.left = x + "px";
-      noBtn.style.top = y + "px";
-      return;
-    }
+  // Top region
+  if (cardRect.top - padding - bh > padding) {
+    regions.push({
+      xMin: padding,
+      xMax: window.innerWidth - bw - padding,
+      yMin: padding,
+      yMax: cardRect.top - padding - bh
+    });
   }
 
-  // Fallback
-  noBtn.style.left = padding + "px";
-  noBtn.style.top = padding + "px";
+  // Bottom region
+  if (window.innerHeight - (cardRect.bottom + padding + bh) > padding) {
+    regions.push({
+      xMin: padding,
+      xMax: window.innerWidth - bw - padding,
+      yMin: cardRect.bottom + padding,
+      yMax: window.innerHeight - bh - padding
+    });
+  }
+
+  // Left region
+  if (cardRect.left - padding - bw > padding) {
+    regions.push({
+      xMin: padding,
+      xMax: cardRect.left - padding - bw,
+      yMin: padding,
+      yMax: window.innerHeight - bh - padding
+    });
+  }
+
+  // Right region
+  if (window.innerWidth - (cardRect.right + padding + bw) > padding) {
+    regions.push({
+      xMin: cardRect.right + padding,
+      xMax: window.innerWidth - bw - padding,
+      yMin: padding,
+      yMax: window.innerHeight - bh - padding
+    });
+  }
+
+  // If screen is too small and no region exists, fallback to top-left
+  if (regions.length === 0) {
+    noBtn.style.left = padding + "px";
+    noBtn.style.top = padding + "px";
+    return;
+  }
+
+  // Pick a random region and random position inside it
+  const r = regions[Math.floor(Math.random() * regions.length)];
+  const x = r.xMin + Math.random() * Math.max(0, (r.xMax - r.xMin));
+  const y = r.yMin + Math.random() * Math.max(0, (r.yMax - r.yMin));
+
+  noBtn.style.left = x + "px";
+  noBtn.style.top = y + "px";
 }
+
 
   function confettiBurst(count = 110) {
     const colors = ["#ff4d8d", "#ffb703", "#4cc9f0", "#22c55e", "#a855f7", "#fb7185"];
