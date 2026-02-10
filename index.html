@@ -436,8 +436,8 @@
     yesScale = 1 + Math.min(dodges * CONFIG.growYesEachTime, 1.2);
     yesBtn.style.transform = `scale(${yesScale})`;
 
-    noScale = Math.max(1 - dodges * CONFIG.shrinkNoEachTime, 0.35);
-    noBtn.style.transform = `scale(${noScale})`;
+    //noScale = Math.max(1 - dodges * CONFIG.shrinkNoEachTime, 0.35);
+    //noBtn.style.transform = `scale(${noScale})`;
     noBtn.style.opacity = String(Math.max(1 - dodges * 0.03, 0.6));
 
     // stop after max dodges
