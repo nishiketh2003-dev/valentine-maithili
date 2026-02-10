@@ -344,63 +344,45 @@
   }
 
   // ====== NO BUTTON TELEPORT (full screen) ======
-  function placeNoButton() {
+ function placeNoButton() {
   const padding = 12;
 
-  // Get Yes button position to avoid overlapping it
+  // Ensure No button is fixed before measuring
+  noBtn.style.position = "fixed";
+  noBtn.style.zIndex = "20";
+
   const yesRect = yesBtn.getBoundingClientRect();
 
-  const bw = noBtn.offsetWidth;
-  const bh = noBtn.offsetHeight;
+  // Measure the CURRENT rendered size of No (including any transforms)
+  const noRendered = noBtn.getBoundingClientRect();
+  const bw = noRendered.width || 140;
+  const bh = noRendered.height || 50;
 
-  // Try a few times to find a spot that doesn't overlap Yes
-  for (let tries = 0; tries < 30; tries++) {
+  for (let tries = 0; tries < 60; tries++) {
     const maxX = window.innerWidth - bw - padding;
     const maxY = window.innerHeight - bh - padding;
 
     const x = padding + Math.random() * Math.max(0, maxX - padding);
     const y = padding + Math.random() * Math.max(0, maxY - padding);
 
-    // Candidate rectangle for No button
-    const noRect = {
-      left: x,
-      top: y,
-      right: x + bw,
-      bottom: y + bh
-    };
-
-    // Check overlap with Yes button (add some extra "personal space")
-    const buffer = 40;
-    const yesBuffered = {
-      left: yesRect.left - buffer,
-      top: yesRect.top - buffer,
-      right: yesRect.right + buffer,
-      bottom: yesRect.bottom + buffer
-    };
-
+    const buffer = 70; // bigger "personal space" so it never feels inside
     const overlapsYes =
-      noRect.left < yesBuffered.right &&
-      noRect.right > yesBuffered.left &&
-      noRect.top < yesBuffered.bottom &&
-      noRect.bottom > yesBuffered.top;
+      x < (yesRect.right + buffer) &&
+      (x + bw) > (yesRect.left - buffer) &&
+      y < (yesRect.bottom + buffer) &&
+      (y + bh) > (yesRect.top - buffer);
 
-    // If it doesn't overlap Yes, place it
     if (!overlapsYes) {
-      noBtn.style.position = "fixed";
       noBtn.style.left = x + "px";
       noBtn.style.top = y + "px";
-      noBtn.style.zIndex = "20";
       return;
     }
   }
 
-  // Fallback: if we failed 30 times, just put it top-left-ish
-  noBtn.style.position = "fixed";
+  // Fallback
   noBtn.style.left = padding + "px";
   noBtn.style.top = padding + "px";
-  noBtn.style.zIndex = "20";
 }
-
 
   function confettiBurst(count = 110) {
     const colors = ["#ff4d8d", "#ffb703", "#4cc9f0", "#22c55e", "#a855f7", "#fb7185"];
@@ -436,8 +418,6 @@
     yesScale = 1 + Math.min(dodges * CONFIG.growYesEachTime, 1.2);
     yesBtn.style.transform = `scale(${yesScale})`;
 
-    //noScale = Math.max(1 - dodges * CONFIG.shrinkNoEachTime, 0.35);
-    //noBtn.style.transform = `scale(${noScale})`;
     noBtn.style.opacity = String(Math.max(1 - dodges * 0.03, 0.6));
 
     // stop after max dodges
